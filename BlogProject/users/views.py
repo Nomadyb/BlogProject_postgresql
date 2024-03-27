@@ -1,7 +1,7 @@
 from django.http.response import JsonResponse
 import json
 from rest_framework.pagination import PageNumberPagination
-from .serializers import UserSerializer
+from .serializers import UserSerializer, UpdateUserSerializer
 from rest_framework import generics
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
@@ -187,3 +187,26 @@ class HomeView(APIView):
                 {"error": "An error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class ProfileDetailView(APIView):
+    permission_classes =  [IsAuthenticated]
+    authentication_classes = (JWTAuthentication,)
+
+    serializer_class = UserSerializer
+
+    def get(self, request):
+        user = request.user
+        serializer = self.serializer_class(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        user = request.user
+        serializer = UpdateUserSerializer(
+            user, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

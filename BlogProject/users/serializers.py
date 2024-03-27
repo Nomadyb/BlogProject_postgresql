@@ -68,11 +68,13 @@ class UpdateUserSerializer(IdSerializer):
     email = serializers.EmailField(max_length=70, required=False)
     role = serializers.ChoiceField(
         choices=["ADMIN", "BLOGGER"], default="BLOGGER", required=False)
+    password = serializers.CharField(max_length=128,required=False)
 
     def update(self, instance, validated_data):
         instance.username = validated_data.get("username", instance.username)
         instance.email = validated_data.get("email", instance.email)
         instance.role = validated_data.get("role", instance.role)
+        instance.set_password(validated_data.get("password", instance.password))
         instance.save()
         return instance
 

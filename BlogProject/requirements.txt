@@ -19,3 +19,4 @@ django-allauth==0.52.0
 pillow==10.2.0
 channels==4.0.0
 daphne==4.0.0
+django-crontab

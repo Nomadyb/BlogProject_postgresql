@@ -27,6 +27,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+# ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split()
 
 AUTH_USER_MODEL = "users.User"
 
@@ -47,7 +48,7 @@ WEBSITE_URL = 'http://localhost:8000'
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=240),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -122,11 +123,17 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
 
     'dj_rest_auth',
     'dj_rest_auth.registration',
 
     "users",
+    "blogger",
+
+
+    'django_crontab',
+
 
 
 ]
@@ -138,8 +145,11 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "blogger.middleware.RoleCheckMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # "blogger.middleware.BloggerMiddleware",
+    # "blogger.middleware.RoleCheckMiddleware",
 ]
 
 ROOT_URLCONF = "BlogProject.urls"
@@ -229,3 +239,9 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+CRONJOBS = [
+    ('*/30 * * * *', 'python3 manage.py flushexpiredtokens',
+     '> /dev/null 2>&1'),  
+]
