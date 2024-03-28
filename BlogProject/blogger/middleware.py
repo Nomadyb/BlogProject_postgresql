@@ -27,6 +27,7 @@
 #         response = self.get_response(request)
 #         return response
 
+
 from django.http import HttpResponseForbidden
 from django.contrib.auth import get_user_model
 from users.models import User

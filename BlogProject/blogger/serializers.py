@@ -10,10 +10,11 @@ class BlogSerializer(serializers.Serializer):
     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
     blog_name = serializers.CharField(max_length=100)
     article = serializers.CharField()
-    publish_date = serializers.DateTimeField()
+    publish_date = serializers.DateTimeField(allow_null=True, required=False)
+    update_date = serializers.DateTimeField(read_only=True)
     active = serializers.BooleanField(default=True)
     created_date = serializers.DateTimeField(read_only=True)
-    update_date = serializers.DateTimeField(read_only=True)
+    # update_date = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
         return Blog.objects.create(**validated_data)
