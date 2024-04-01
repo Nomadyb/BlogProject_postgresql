@@ -19,8 +19,7 @@ User = get_user_model()
 
 
 class BlogView(APIView):
-    # permission_classes = [IsAuthenticated, IsBlogger]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsBlogger]
     authentication_classes = (JWTAuthentication,)
 
     def get(self, request):
@@ -50,27 +49,31 @@ class BlogView(APIView):
     #     else:
     #         return HttpResponseForbidden("Bu işlemi gerçekleştirmek için yetkiniz yok.")
 
-#two
+#second 27 mart
     # def post(self, request):
+    #     blog_data = {
+    #         'author': request.user,
+    #         'blog_name': request.data.get('blog_name'),
+    #         'article': request.data.get('article'),
+    #         'update_date': datetime.now(),
+    #         'active': request.data.get('active', True)
+    #     }
+
     #     serializer = BlogSerializer(
-    #         data=request.data, context={'request': request})
+    #         data=blog_data, context={'request': request})
     #     if serializer.is_valid():
-    #         serializer.save(author=request.user)
+    #         serializer.save()
     #         return Response(serializer.data, status=status.HTTP_201_CREATED)
     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
     def post(self, request):
-        request_data = request.data
-        if request.user.role == 'BLOGGER':
-            serializer = BlogSerializer(
-                data=request_data, context={'request': request})
-            if serializer.is_valid():
-                serializer.save(author=request.user)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({"error": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+        serializer = BlogSerializer(
+            data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(author=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
     def patch(self, request):
@@ -89,27 +92,49 @@ class BlogView(APIView):
         return Response({"response": "Deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 
-# class BlogCreateView(APIView):
-#     authentication_classes = (JWTAuthentication,)
-#     permission_classes = [IsAuthenticated, IsBlogger]
 
-#     def post(self, request):
-#         serializer = BlogSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save(author=request.user)
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # class BlogDetailView(APIView):
-#     authentication_classes = (JWTAuthentication,)
 #     permission_classes = [IsAuthenticated]
+#     authentication_classes = (JWTAuthentication,)
 
 #     def get(self, request):
 #         blog_id = request.query_params.get('id')
 #         blog = get_object_or_404(Blog, pk=blog_id)
 #         serializer = BlogSerializer(blog)
 #         return Response(serializer.data)
+
+
+
+# class BlogCreateView(APIView):
+#     permission_classes = [IsAuthenticated]
+#     authentication_classes = (JWTAuthentication,)
+
+#     def post(self, request):
+#         user = request.user
+#         if user.role == 'BLOGGER':
+#             blog_data = {
+#                 'author': user,
+#                 'blog_name': request.data.get('blog_name'),
+#                 'article': request.data.get('article'),
+#                 # 'update_date': datetime.now(),  # Set update_date to current date and time
+#                 'active': request.data.get('active', True)
+#             }
+
+#             serializer = BlogSerializer(
+#                 data=blog_data, context={'request': request})
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         else:
+#             return HttpResponseForbidden("Bu işlemi gerçekleştirmek için yetkiniz yok.")
+
+
+# class BlogUpdateView(APIView):
+#     permission_classes = [IsAuthenticated]
+#     authentication_classes = (JWTAuthentication,)
 
 #     def patch(self, request):
 #         blog_id = request.query_params.get('id')
@@ -119,6 +144,13 @@ class BlogView(APIView):
 #             serializer.save()
 #             return Response(serializer.data)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class BlogDeleteView(DestroyAPIView):
+#     permission_classes = [IsAuthenticated]
+#     authentication_classes = (JWTAuthentication,)
+#     queryset = Blog.objects.all()
+#     serializer_class = BlogSerializer
 
 #     def delete(self, request):
 #         blog_id = request.query_params.get('id')

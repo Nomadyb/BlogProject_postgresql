@@ -241,7 +241,11 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
+# CRONJOBS = [
+#     ('*/30 * * * *', 'python3 manage.py flushexpiredtokens',
+#      '> /dev/null 2>&1'),  
+# ]
+
 CRONJOBS = [
-    ('*/30 * * * *', 'python3 manage.py flushexpiredtokens',
-     '> /dev/null 2>&1'),  
+    ('*/1 * * * *', 'python3 manage.py flushexpiredtokens'),
 ]
