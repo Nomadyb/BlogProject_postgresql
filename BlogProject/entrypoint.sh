@@ -15,8 +15,11 @@ fi
 python manage.py makemigrations
 python manage.py migrate
 
+
+
 # Add crontab jobs
 python manage.py crontab add
+python manage.py crontab show
 
 # Execute any additional commands passed to the script
 exec "$@"

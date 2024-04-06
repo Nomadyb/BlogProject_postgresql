@@ -24,6 +24,7 @@ from django.contrib import admin
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("users.urls")),
-    path("",include("blogger.urls")),
+    path("", include("blogger.urls")),
+    path("", include("administration.urls")),
     
 ]

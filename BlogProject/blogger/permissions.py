@@ -7,9 +7,9 @@ class IsBlogger(BasePermission):
     """
 
     def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
+        if  (request.user.is_authenticated and  request.user.role == 'BLOGGER'):
             return True
-        return request.user.is_authenticated and  request.user.role == 'BLOGGER'
+        return False
 
     def has_object_permission(self, request, view, obj):
         # Sadece objenin sahibi (yazarı) blogu güncelleme ve silme işlemi yapabilir

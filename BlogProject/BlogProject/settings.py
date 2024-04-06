@@ -130,6 +130,7 @@ INSTALLED_APPS = [
 
     "users",
     "blogger",
+    "administration",
 
 
     'django_crontab',
@@ -247,5 +248,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ]
 
 CRONJOBS = [
-    ('*/1 * * * *', 'python3 manage.py flushexpiredtokens'),
+    ('*/1 * * * *', 'docker exec blogproject_postgresql-web-1 python3 manage.py flushexpiredtokens'),
+    # ('*/1 * * * *', 'python3 manage.py flushexpiredtokens'),
 ]
+
+#docker exec blogproject_postgresql-web-1 python3 manage.py
+
+
+
