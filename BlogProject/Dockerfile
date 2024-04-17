@@ -19,6 +19,13 @@ RUN chmod +x /usr/src/BlogProject/entrypoint.sh
 
 COPY . .
 
+
+# Crontab betiğini kopyala
+COPY ./blog-cron.py /usr/src/BlogProject/blog-cron.py
+
+# Crontab betiği için izinleri ayarla
+RUN chmod +x /usr/src/BlogProject/blog-cron.py
+
 # RUN service cron start
 
 ENTRYPOINT [ "/usr/src/BlogProject/entrypoint.sh" ]

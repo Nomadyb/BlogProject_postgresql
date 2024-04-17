@@ -81,8 +81,6 @@ class RoleCheckMiddleware:
 
     def __call__(self, request):
         User = get_user_model()
-
-        # CSRF korumasını devre dışı bırak
         setattr(request, '_dont_enforce_csrf_checks', True)
 
         if request.user.is_authenticated:

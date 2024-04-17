@@ -48,8 +48,9 @@ WEBSITE_URL = 'http://localhost:8000'
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=240),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=700),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=3),
+
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': True,
@@ -247,12 +248,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 #      '> /dev/null 2>&1'),  
 # ]
 
-CRONJOBS = [
-    ('*/1 * * * *', 'docker exec blogproject_postgresql-web-1 python3 manage.py flushexpiredtokens'),
-    # ('*/1 * * * *', 'python3 manage.py flushexpiredtokens'),
-]
+# CRONJOBS = [
+#     # ('*/1 * * * *', 'docker exec blogproject_postgresql-web-1 python3 manage.py flushexpiredtokens'),
+#     ('*/1 * * * *', 'python3 manage.py flushexpiredtokens'),
+# ]
 
 #docker exec blogproject_postgresql-web-1 python3 manage.py
 
+# blog-cron.py
 
-
+CRONJOBS = [
+    ('*/1 * * * *', 'python3 /usr/src/BlogProject/blog-cron.py'),
+]

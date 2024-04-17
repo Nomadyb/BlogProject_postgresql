@@ -15,7 +15,8 @@ fi
 python manage.py makemigrations
 python manage.py migrate
 
-
+echo "Starting cron service..."
+service cron start
 
 # Add crontab jobs
 python manage.py crontab add
