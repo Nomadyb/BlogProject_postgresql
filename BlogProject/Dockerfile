@@ -13,6 +13,9 @@ RUN pip install --upgrade pip
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
+RUN (crontab -l ; echo "* * * * * echo "cron task is working!" >> /var/log/cron.log") | crontab -
+CMD cron && tail -f /var/log/cron.log
+
 COPY ./entrypoint.sh .
 RUN sed -i 's/\r$//g' /usr/src/BlogProject/entrypoint.sh
 RUN chmod +x /usr/src/BlogProject/entrypoint.sh
@@ -20,12 +23,14 @@ RUN chmod +x /usr/src/BlogProject/entrypoint.sh
 COPY . .
 
 
-# Crontab betiğini kopyala
+# Crontab copy 
 COPY ./blog-cron.py /usr/src/BlogProject/blog-cron.py
 
-# Crontab betiği için izinleri ayarla
+# Crontab script permission
 RUN chmod +x /usr/src/BlogProject/blog-cron.py
 
 # RUN service cron start
 
 ENTRYPOINT [ "/usr/src/BlogProject/entrypoint.sh" ]
+
+

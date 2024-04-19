@@ -48,8 +48,8 @@ WEBSITE_URL = 'http://localhost:8000'
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=700),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=3),
+    'ACCESS_TOKEN_LIFETIME': timedelta(seconds=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(seconds=60),
 
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -244,7 +244,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # CRONJOBS = [
-#     ('*/30 * * * *', 'python3 manage.py flushexpiredtokens',
+#     ('*/1 * * * *', 'python3 manage.py flushexpiredtokens',
 #      '> /dev/null 2>&1'),  
 # ]
 
@@ -257,6 +257,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # blog-cron.py
 
+# CRONJOBS = [
+#     ('*/1 * * * *', 'python3 /usr/src/BlogProject/blog-cron.py'),
+# ]
+
 CRONJOBS = [
-    ('*/1 * * * *', 'python3 /usr/src/BlogProject/blog-cron.py'),
+    ('*/1 * * * *', 'usr.src.BlogProject.blog-cron.Command'),
 ]

@@ -18,6 +18,11 @@ python manage.py migrate
 echo "Starting cron service..."
 service cron start
 
+python3 manage.py flushexpiredtokens
+
+# Start cron service
+service cron start
+
 # Add crontab jobs
 python manage.py crontab add
 python manage.py crontab show
