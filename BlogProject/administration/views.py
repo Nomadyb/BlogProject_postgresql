@@ -7,9 +7,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
-from blogger.models import Blog
+from blogger.models import Blog , Comment
 from .serializers import AdminSerializer
-from blogger.serializers import BlogSerializer
+from blogger.serializers import BlogSerializer,CommentSerializer
 from users.serializers import *
 from datetime import datetime, timezone
 from .permissions import IsAdmin
@@ -22,15 +22,42 @@ class BloggerViewSet(APIView):
     authentication_classes = [JWTAuthentication]
 
 
+    # def get(self, request):
+    #     user_id = request.query_params.get('id',None)
+    #     if user_id:
+    #         user = get_object_or_404(User, pk=user_id, role='BLOGGER')
+    #         serializer = AdminSerializer(user)
+    #     else:
+    #         blogger_users = User.objects.filter(role="BLOGGER")
+    #         serializer = AdminSerializer(blogger_users, many=True)
+    #     return Response(serializer.data)
+
+
+
+
+    def get_comments(self, user_id):
+        user = get_object_or_404(User, pk=user_id, role='BLOGGER')
+        comments = Comment.objects.filter(author=user)
+        serializer = CommentSerializer(comments, many=True)
+        return serializer.data
+
     def get(self, request):
-        user_id = request.query_params.get('id',none)
+        user_id = request.query_params.get('id', None)
         if user_id:
             user = get_object_or_404(User, pk=user_id, role='BLOGGER')
             serializer = AdminSerializer(user)
+            # Kullanıcı için yorumları almak için get_comments yöntemini çağırın
+            serializer.data['comments'] = self.get_comments(user_id)
         else:
             blogger_users = User.objects.filter(role="BLOGGER")
             serializer = AdminSerializer(blogger_users, many=True)
+            for data in serializer.data:
+                # Her bir Blogger kullanıcısının yorumlarını almak için get_comments yöntemini çağırın
+                # Burada Blogger kullanıcısının id'sini geçirin
+                data['comments'] = self.get_comments(data['id'])
         return Response(serializer.data)
+
+
 
     def post(self, request):
         serializer = CreateUserSerializer(data=request.data)

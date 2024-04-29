@@ -1,34 +1,45 @@
 from rest_framework import serializers
-from .models import Blog
+from .models import Blog, Comment
 from django.contrib.auth import get_user_model
+from django.db import DatabaseError
 
 User = get_user_model()
 
+#    def get_comments(self, obj):
+#        return Comment.objects.filter(author=obj).count()
 
-# class BlogSerializer(serializers.Serializer):
+# class BlogSerializer(serializers.ModelSerializer):
 #     id = serializers.IntegerField(read_only=True)
 #     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
 #     blog_name = serializers.CharField(max_length=100)
 #     article = serializers.CharField()
-#     #TODO: publish date olmasın update_date , active not true 
-#     # publish_date = serializers.DateTimeField(allow_null=True, required=False)
 #     update_date = serializers.DateTimeField(read_only=True)
 #     active = serializers.BooleanField(default=False)
 #     created_date = serializers.DateTimeField(read_only=True)
-#     # update_date = serializers.DateTimeField(read_only=True)
+#     publish_date = serializers.DateTimeField(required=False)
+#     image = serializers.ImageField(required=False)  # Görüntü alanını ekle
 
 #     def create(self, validated_data):
-#         return Blog.objects.create(**validated_data)
+#         try:
+#             return Blog.objects.create(**validated_data)
+#         except DatabaseError:
+#             raise serializers.ValidationError("Database error occurred")
 
 #     def update(self, instance, validated_data):
-#         instance.blog_name = validated_data.get(
-#             "blog_name", instance.blog_name)
-#         instance.article = validated_data.get("article", instance.article)
-#         instance.publish_date = validated_data.get(
-#             "publish_date", instance.publish_date)
-#         instance.active = validated_data.get("active", instance.active)
-#         instance.save()
-#         return instance
+#         try:
+#             instance.blog_name = validated_data.get(
+#                 "blog_name", instance.blog_name)
+#             instance.article = validated_data.get("article", instance.article)
+#             instance.active = validated_data.get("active", instance.active)
+#             instance.publish_date = validated_data.get(
+#                 "publish_date", instance.publish_date)
+#             instance.image = validated_data.get(
+#                 "image", instance.image)  # Görüntü alanını güncelle
+#             instance.save()
+#             return instance
+#         except DatabaseError:
+#             raise serializers.ValidationError("Database error occurred")
+
 
 class BlogSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -39,19 +50,73 @@ class BlogSerializer(serializers.Serializer):
     active = serializers.BooleanField(default=False)
     created_date = serializers.DateTimeField(read_only=True)
     publish_date = serializers.DateTimeField(required=False)
+    image = serializers.ImageField(required=False)  # Görüntü alanını ekle
 
     def create(self, validated_data):
         return Blog.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        instance.blog_name = validated_data.get(
-            "blog_name", instance.blog_name)
-        instance.article = validated_data.get("article", instance.article)
-        instance.active = validated_data.get("active", instance.active)
-        instance.publish_date = validated_data.get("publish_date", instance.publish_date)
-
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
         instance.save()
         return instance
 
-    # def get_username(self, obj):
-    #     return obj.author.username
+        
+
+# class CommentSerializer(serializers.Serializer):
+#     id = serializers.IntegerField(read_only=True)
+#     has = serializers.PrimaryKeyRelatedField(queryset=Blog.objects.all())
+#     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
+#     comments = serializers.CharField()
+#     created_date = serializers.DateTimeField(read_only=True)
+#     updated_date = serializers.DateTimeField(read_only=True)
+
+#     def create(self,validated_data):
+#         return Comment.objects.create(**validated_data)
+    
+#     def update(self,instance,validated_data):
+#         for key, value in validated_data.items():
+#             setattr(instance, key, value)
+#         instance.save()
+#         return instance
+
+
+
+
+class CommentSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    has = serializers.PrimaryKeyRelatedField(
+        queryset=Blog.objects.all(), required=False)
+    #TODO: id'yi al query olarak 
+    comments = serializers.CharField()
+    author = serializers.CharField(
+        source='author.username', read_only=True)  # Yazarın adını almak için
+    created_date = serializers.DateTimeField(read_only=True)
+    updated_date = serializers.DateTimeField(read_only=True)
+
+    def create(self, validated_data):
+        author = self.context['request'].user
+        validated_data['author'] = author
+
+        return Comment.objects.create(**validated_data)
+
+
+    # def create(self, validated_data):
+    #     # Yazarı doğrudan validated_data'dan al
+    #     author = validated_data.pop('author', None)
+    #     # Yazar bilgisi yoksa veya geçersizse hata fırlat
+    #     if not author:
+    #         raise serializers.ValidationError("Author information is missing.")
+    #     # Gelen kullanıcı adına sahip kullanıcıyı bul
+    #     user = User.objects.filter(username=author).first()
+    #     if not user:
+    #         raise serializers.ValidationError("Invalid author username.")
+    #     validated_data['author'] = user
+    #     return Comment.objects.create(**validated_data)
+
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance

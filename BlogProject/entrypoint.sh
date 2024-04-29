@@ -15,17 +15,14 @@ fi
 python manage.py makemigrations
 python manage.py migrate
 
-echo "Starting cron service..."
-service cron start
-
-python3 manage.py flushexpiredtokens
-
-# Start cron service
-service cron start
-
-# Add crontab jobs
-python manage.py crontab add
-python manage.py crontab show
+# If this is going to be a cron container, set up the crontab.
+if [ "$1" = "cron" ]; then
+  echo "Starting cron service..."
+  service cron start
+  python manage.py crontab show
+  crontab /etc/cron.d/crontab
+  cron && tail -f /var/log/cron.log
+fi
 
 # Execute any additional commands passed to the script
 exec "$@"

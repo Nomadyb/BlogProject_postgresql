@@ -17,14 +17,28 @@ Including another URLconf
 
 from django.urls import path, include
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 
 
-# from users.views import RegisterView
+from users.views import RegisterView
+if settings.DEBUG:
+    urlpatterns = [
+        path("admin/", admin.site.urls),
+        path("", include("users.urls")),
+        path("", include("blogger.urls")),
+        path("", include("administration.urls")),
 
-urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("", include("users.urls")),
-    path("", include("blogger.urls")),
-    path("", include("administration.urls")),
+    ] + static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+
+
+
+
+
+# urlpatterns = [
+#     path("admin/", admin.site.urls),
+#     path("", include("users.urls")),
+#     path("", include("blogger.urls")),
+#     path("", include("administration.urls")),
     
-]
+# ]

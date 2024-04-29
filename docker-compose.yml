@@ -20,6 +20,15 @@ services:
       - POSTGRES_USER=postgresuser
       - POSTGRES_PASSWORD=postgrespassword
       - POSTGRES_DB=BlogProject
+  cron:
+    build: ./BlogProject
+    command: cron -f
+    volumes:
+      - ./BlogProject/:/usr/src/BlogProject/
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
 
 volumes:
   postgres_data:

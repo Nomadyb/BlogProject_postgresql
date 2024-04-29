@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-import os 
+from celery.schedules import crontab
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -21,12 +22,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = "django-insecure-4=3j9tlq(_()+gfb1p0hp3^wc74t0y-h0vja_s@f9yh#o(jpbk"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = ['example.com', 'localhost', '127.0.0.1']
+# ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 # ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split()
 
 AUTH_USER_MODEL = "users.User"
@@ -48,8 +50,8 @@ WEBSITE_URL = 'http://localhost:8000'
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(seconds=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(seconds=60),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=360),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=3),
 
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -108,7 +110,6 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -135,7 +136,6 @@ INSTALLED_APPS = [
 
 
     'django_crontab',
-
 
 
 ]
@@ -197,8 +197,6 @@ DATABASES = {
 }
 
 
-
-
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -242,10 +240,60 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+CRONJOBS = [
+    ('*/1 * * * *' ,'/usr/local/bin/python /usr/src/BlogProject/blog-cron.py >> /var/log/cron.log 2>&1'),
+]
+
+# CRONJOBS = [
+#     ('* * * * *', 'django.core.management.call_command', ['blog-cron']),
+# ]
+
+
+
+
+
+# CRONJOBS = [
+#     ('* * * * *', 'django.core.management.call_command',
+#      ['flushexpiredtokens']),
+# ]
+
+
+# CRONJOBS = [
+#     ('* * * * *', 'django.core.management.call_command',
+#      ['flushexpiredtokens']),
+# ]
+
+# docker exec -it blogproject_postgresql-web-1 which python
+# /usr/local/bin/python
+
+# CRONJOBS = [
+#     ('* * * * *', 'django.core.management.call_command',
+#      ['flushexpiredtokens'], '>> /tmp/mycronjob.log'),
+# ]
+
+# CRONJOBS = [
+#     ('* * * * *', 'sh -c',
+#      ['python manage.py flushexpiredtokens >> /tmp/mycronjob.log 2>&1']),
+# ]
+
+# CRONJOBS = [
+#     ('* * * * *',
+#      ['python manage.py flushexpiredtokens']),
+# ]
+
+
+# CRONJOBS = [
+#     ('* * * * *', 'BlogProject.blog-cron.Command', '>>  /var/log/cron.log 2 > &1'),
+# ]
+
 
 # CRONJOBS = [
 #     ('*/1 * * * *', 'python3 manage.py flushexpiredtokens',
-#      '> /dev/null 2>&1'),  
+#      '> /dev/null 2>&1'),
 # ]
 
 # CRONJOBS = [
@@ -253,14 +301,57 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 #     ('*/1 * * * *', 'python3 manage.py flushexpiredtokens'),
 # ]
 
-#docker exec blogproject_postgresql-web-1 python3 manage.py
+# docker exec blogproject_postgresql-web-1 python3 manage.py
 
 # blog-cron.py
+
+
+# CRONJOBS = [
+#     ('*/1 * * * *', 'BlogProject.blog-cron.Command'),
+# ]
+
+
+# CRONJOBS = [
+#     ('*/1 * * * *', 'django.core.management.call_command',
+#      ['flushexpiredtokens']),
+# ]
+
+
+# CRONJOBS = [
+#     ('*/1 * * * *', 'python3 manage.py flushexpiredtokens'),
+#     # ('0 2 * * * / usr/local/bin/python / usr/src/app/manage.py flushexpiredtokens'),
+#     # ('0 2 * * * echo "flushed expired tokens" >> /var/log/cron.log 2 > &1'),
+#     # ('*/1 * * * *', 'docker exec blogproject_postgresql-web-1 python manage.py flushexpiredtokens')
+# ]
+
+# CRONJOBS = [
+#     ('*/1 * * * *', 'docker exec blogproject_postgresql-web-1 python manage.py flushexpiredtokens')
+# ]
+
 
 # CRONJOBS = [
 #     ('*/1 * * * *', 'python3 /usr/src/BlogProject/blog-cron.py'),
 # ]
 
-CRONJOBS = [
-    ('*/1 * * * *', 'usr.src.BlogProject.blog-cron.Command'),
-]
+
+# CRONJOBS = [
+#     ('0 0 * * *', 'BlogProject.blog-cron.Command',
+#      ['flushexpiredtokens'], {'verbosity': 0})
+# ]
+
+
+# CRONJOBS = [
+#     ('0 0 * * *', 'django.core.management.call_command',
+#      ['flushexpiredtokens'], {'verbosity': 0})
+# ]
+
+
+# CRONJOBS = [
+#     ('* * * * *', 'BlogProject.blog-cron.flush_expired_tokens',
+#      '>> /var/log/cron.log 2>&1')
+# ]
+
+# CRONJOBS = [
+#     ('* * * * *', 'django.core.management.call_command',
+#      ['flushexpiredtokens'], {'verbosity': 2})
+# ]

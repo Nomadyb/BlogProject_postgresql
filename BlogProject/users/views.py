@@ -1,5 +1,7 @@
 from django.http.response import JsonResponse
 import json
+from blogger.models import *
+from blogger.serializers import BlogSerializer
 from rest_framework.pagination import PageNumberPagination
 from .serializers import UserSerializer, UpdateUserSerializer
 from rest_framework import generics
@@ -163,10 +165,12 @@ class HomeView(APIView):
     def get(self, request):
         try:
             if request.user.role == 'BLOGGER':
-                user_data = UserSerializer(request.user).data
+                blogs = Blog.objects.filter(
+                    author=request.user).order_by('-update_date')
+                blog_data = BlogSerializer(blogs, many=True).data
             elif request.user.role == 'ADMIN':
-                queryset = User.objects.all()
-                user_data = UserSerializer(queryset, many=True).data
+                blogs = Blog.objects.all().order_by('-update_date')
+                blog_data = BlogSerializer(blogs, many=True).data
             else:
                 return Response(
                     {"error": "Invalid user role"},
@@ -177,7 +181,7 @@ class HomeView(APIView):
                 {
                     "isSuccess": True,
                     "message": "Data retrieved successfully",
-                    "data": user_data,
+                    "data": blog_data,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -189,24 +193,70 @@ class HomeView(APIView):
             )
 
 
+
+"""
+ burası token rolüne göre admin ise tüm kullanıcılar 
+ blogger ise blogger detail verir.
+"""
+# class HomeView(APIView):
+#     permission_classes = (IsAuthenticated,)
+#     authentication_classes = (JWTAuthentication,)
+
+#     def get(self, request):
+#         try:
+#             if request.user.role == 'BLOGGER':
+#                 user_data = UserSerializer(request.user).data
+#             elif request.user.role == 'ADMIN':
+#                 queryset = User.objects.all()
+#                 user_data = UserSerializer(queryset, many=True).data
+#             else:
+#                 return Response(
+#                     {"error": "Invalid user role"},
+#                     status=status.HTTP_400_BAD_REQUEST,
+#                 )
+
+#             return Response(
+#                 {
+#                     "isSuccess": True,
+#                     "message": "Data retrieved successfully",
+#                     "data": user_data,
+#                 },
+#                 status=status.HTTP_200_OK,
+#             )
+
+#         except Exception as e:
+#             return Response(
+#                 {"error": "An error occurred"},
+#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             )
+
+
+
 class ProfileDetailView(APIView):
-    permission_classes =  [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     authentication_classes = (JWTAuthentication,)
 
     serializer_class = UserSerializer
 
     def get(self, request):
-        user = request.user
-        serializer = self.serializer_class(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            user = request.user
+            serializer = self.serializer_class(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            raise APIException(str(e))
 
     def patch(self, request):
-        user = request.user
-        serializer = UpdateUserSerializer(
-            user, data=request.data, partial=True
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = request.user
+            serializer = UpdateUserSerializer(
+                user, data=request.data, partial=True
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return APIException(str(e))
+
 

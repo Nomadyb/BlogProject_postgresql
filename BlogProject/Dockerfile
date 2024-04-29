@@ -1,36 +1,32 @@
 FROM python:3.12.2-slim-bullseye
-WORKDIR /usr/src/BlogProject
 
+WORKDIR /usr/src/BlogProject
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN apt-get update && apt-get install -y netcat
-RUN apt-get update && apt-get install -y cron && touch /var/log/cron.log
-
+RUN apt-get update && apt-get install -y netcat cron && touch /var/log/cron.log
 
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
-RUN (crontab -l ; echo "* * * * * echo "cron task is working!" >> /var/log/cron.log") | crontab -
-CMD cron && tail -f /var/log/cron.log
-
-COPY ./entrypoint.sh .
-RUN sed -i 's/\r$//g' /usr/src/BlogProject/entrypoint.sh
+COPY ./entrypoint.sh /usr/src/BlogProject/entrypoint.sh
 RUN chmod +x /usr/src/BlogProject/entrypoint.sh
 
-COPY . .
-
-
-# Crontab copy 
 COPY ./blog-cron.py /usr/src/BlogProject/blog-cron.py
-
-# Crontab script permission
 RUN chmod +x /usr/src/BlogProject/blog-cron.py
 
-# RUN service cron start
+COPY ./flush_tokens.sh /usr/src/BlogProject/flush_tokens.sh
+RUN chmod +x /usr/src/BlogProject/flush_tokens.sh
 
-ENTRYPOINT [ "/usr/src/BlogProject/entrypoint.sh" ]
+COPY ./cronjob /etc/cron.d/crontab 
+RUN chmod 0644 /etc/cron.d/crontab
+
+# RUN (crontab -l ; echo "*/1 * * * * /usr/local/bin/python3 /usr/src/BlogProject/blog-cron.py >> /var/log/cron.log 2>&1") | crontab
+
+RUN echo "*/1 * * * * /usr/local/bin/python /usr/src/BlogProject/blog-cron.py >> /var/log/cron.log 2>&1" | crontab -
 
 
+ENTRYPOINT ["/usr/src/BlogProject/entrypoint.sh"]
+CMD ["./manage.py", "runserver", "0.0.0.0:8080"]

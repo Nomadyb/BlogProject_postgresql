@@ -24,9 +24,24 @@ class Blog(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     blog_name = models.CharField(max_length=100)
     article = models.TextField()
+    #TODO:bir image eklemeyi unutma boş olsun 
     # Admin onayı beklerken boş olabilir
     publish_date = models.DateTimeField(null=True, blank=True)
     update_date = models.DateTimeField(null=True)  # Null olabilir
     active = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, default='waiting')
+    image = models.ImageField(upload_to='media',null=True,blank=True)
+
+
+
+class Comment(models.Model):
+    has = models.ForeignKey(Blog,on_delete = models.CASCADE)
+    author = models.ForeignKey(User,on_delete=models.CASCADE)
+    comments = models.TextField()
+    # score = models.IntegerField()
+    created_date = models.DateTimeField(auto_now=False,auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True,auto_now_add=False)
+
+    def __str__(self):
+        return self.comments

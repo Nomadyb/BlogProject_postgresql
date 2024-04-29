@@ -79,7 +79,6 @@ class UpdateUserSerializer(IdSerializer):
         return instance
 
 
-User = get_user_model()
 
 
 class UserSerializer(serializers.Serializer):
