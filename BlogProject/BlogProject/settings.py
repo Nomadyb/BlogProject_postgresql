@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-from celery.schedules import crontab
+
 import os
 from pathlib import Path
 from datetime import timedelta
@@ -23,13 +23,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-4=3j9tlq(_()+gfb1p0hp3^wc74t0y-h0vja_s@f9yh#o(jpbk"
+#AES KEY
+KEY = b'1IX,AX&%94DX%aw,t2H*eGqXLKN%s\''
 
-# SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = ['example.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ["*"]
 # ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 # ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split()
+# ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(' ')
+
 
 AUTH_USER_MODEL = "users.User"
 
@@ -175,16 +179,10 @@ TEMPLATES = [
 WSGI_APPLICATION = "BlogProject.wsgi.application"
 
 
+
+
+
 # Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get("SQL_ENGINE"),
@@ -240,20 +238,18 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+#TODO: frontend base64 ile gönderince alacaksın media klasörü ile işin olmayacak 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 CRONJOBS = [
-    ('*/1 * * * *' ,'/usr/local/bin/python /usr/src/BlogProject/blog-cron.py >> /var/log/cron.log 2>&1'),
+    ('*/1 * * * *', '/usr/local/bin/python /usr/src/BlogProject/blog-cron.py >> /var/log/cron.log 2>&1'),
 ]
 
 # CRONJOBS = [
 #     ('* * * * *', 'django.core.management.call_command', ['blog-cron']),
 # ]
-
-
-
 
 
 # CRONJOBS = [

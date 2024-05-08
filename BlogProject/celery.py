@@ -8,7 +8,7 @@ from celery.schedules import crontab
 # Django ayarlarını yükle
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'BlogProject.settings')
 
-app = Celery('blog_celery')
+app = Celery('celery')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 

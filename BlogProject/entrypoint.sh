@@ -15,7 +15,13 @@ fi
 python manage.py makemigrations
 python manage.py migrate
 
-# If this is going to be a cron container, set up the crontab.
+
+# // This part of the shell script is checking if the first argument passed to the script is "cron". If
+# // the condition is true, it will start the cron service, display the current cron jobs for the Django
+# // project using `python manage.py crontab show`, install the cron jobs from `/etc/cron.d/crontab`
+# // using `crontab`, start the cron daemon using `cron`, and then continuously display the log output of
+# // the cron service using `tail -f /var/log/cron.log`.
+
 if [ "$1" = "cron" ]; then
   echo "Starting cron service..."
   service cron start

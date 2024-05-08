@@ -1,3 +1,6 @@
+from .encryption_utils import encrypt_image, decrypt_image
+from django.conf import settings
+import base64
 from rest_framework import serializers
 from .models import Blog, Comment
 from django.contrib.auth import get_user_model
@@ -40,6 +43,32 @@ User = get_user_model()
 #         except DatabaseError:
 #             raise serializers.ValidationError("Database error occurred")
 
+"""
+use-1
+"""
+# class BlogSerializer(serializers.Serializer):
+#     id = serializers.IntegerField(read_only=True)
+#     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
+#     blog_name = serializers.CharField(max_length=100)
+#     article = serializers.CharField()
+#     update_date = serializers.DateTimeField(read_only=True)
+#     active = serializers.BooleanField(default=False)
+#     created_date = serializers.DateTimeField(read_only=True)
+#     publish_date = serializers.DateTimeField(required=False)
+#     image = serializers.ImageField(required=False)  
+
+#     def create(self, validated_data):
+#         return Blog.objects.create(**validated_data)
+
+#     def update(self, instance, validated_data):
+#         for key, value in validated_data.items():
+#             setattr(instance, key, value)
+#         instance.save()
+#         return instance
+
+"""
+AES
+"""
 
 class BlogSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -50,18 +79,64 @@ class BlogSerializer(serializers.Serializer):
     active = serializers.BooleanField(default=False)
     created_date = serializers.DateTimeField(read_only=True)
     publish_date = serializers.DateTimeField(required=False)
-    image = serializers.ImageField(required=False)  # Görüntü alanını ekle
+    #TODO: değiştir image yapısını 
+    image = serializers.ImageField(required=False)
 
     def create(self, validated_data):
+        image = validated_data.pop('image', None)
+        if image:
+            encrypted_image = encrypt_image(image.path, settings.KEY)
+            validated_data['image'] = encrypted_image
         return Blog.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
+        image = validated_data.pop('image', None)
+        if image:
+            encrypted_image = encrypt_image(image.path, settings.KEY)
+            validated_data['image'] = encrypted_image
         for key, value in validated_data.items():
             setattr(instance, key, value)
         instance.save()
         return instance
 
-        
+"""
+useless
+"""
+# class BlogSerializer(serializers.Serializer):
+#     id = serializers.IntegerField(read_only=True)
+#     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
+#     blog_name = serializers.CharField(max_length=100)
+#     article = serializers.CharField()
+#     update_date = serializers.DateTimeField(read_only=True)
+#     active = serializers.BooleanField(default=False)
+#     created_date = serializers.DateTimeField(read_only=True)
+#     publish_date = serializers.DateTimeField(required=False)
+#     image = serializers.ImageField(required=False)
+
+#     def to_representation(self, instance):
+#         ret = super().to_representation(instance)
+#         if instance.image:
+#             ret['image'] = self.encode_image(instance.image)
+#         return ret
+
+#     def encode_image(self, image):
+#         with open(image.path, 'rb') as f:
+#             encoded_string = base64.b64encode(f.read()).decode('utf-8')
+#         return encoded_string
+
+
+
+#     def create(self, validated_data):
+#         return Blog.objects.create(**validated_data)
+
+#     def update(self, instance, validated_data):
+#         for key, value in validated_data.items():
+#             setattr(instance, key, value)
+#         instance.save()
+#         return instance
+
+
+
 
 # class CommentSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(read_only=True)

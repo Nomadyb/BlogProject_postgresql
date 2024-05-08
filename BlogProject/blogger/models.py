@@ -31,6 +31,7 @@ class Blog(models.Model):
     active = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, default='waiting')
+    #TODO: imagefield olarak tutma url yapısı olarak bak 
     image = models.ImageField(upload_to='media',null=True,blank=True)
 
 

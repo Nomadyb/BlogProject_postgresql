@@ -25,16 +25,33 @@
 #     flush_expired_tokens()
 
 
+# from django.core.management.base import BaseCommand
+# from django.core.management import call_command
+# from datetime import timedelta, date, datetime
+
+
+# class Command(BaseCommand):
+#     print("flushexpiredtokens command executed successfully at", datetime.now())
+
+#     def handle(self, *args, **kwargs):
+#         call_command('flushexpiredtokens')
+#         print("flushexpiredtokens command executed successfully at", datetime.now())
+
+
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
-from datetime import timedelta, date, datetime
+from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    def handle(self, *args, **kwargs):
+    help = 'Flush expired tokens and log output to cron.log'
+    logger.info('Flushing expired tokens at %s', datetime.now())
+    def handle(self, *args, **options):
         call_command('flushexpiredtokens')
-        print("flushexpiredtokens command executed successfully at", datetime.now())
-
+        logger.info('Flushed expired tokens at %s', datetime.now())
 
 
 """

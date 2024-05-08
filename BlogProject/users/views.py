@@ -16,7 +16,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import logging
-
+from django.db.models import Q
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -164,24 +164,14 @@ class HomeView(APIView):
 
     def get(self, request):
         try:
-            if request.user.role == 'BLOGGER':
-                blogs = Blog.objects.filter(
-                    author=request.user).order_by('-update_date')
-                blog_data = BlogSerializer(blogs, many=True).data
-            elif request.user.role == 'ADMIN':
-                blogs = Blog.objects.all().order_by('-update_date')
-                blog_data = BlogSerializer(blogs, many=True).data
-            else:
-                return Response(
-                    {"error": "Invalid user role"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            blogs = Blog.objects.filter(active=True)
+            blog_data = BlogSerializer(blogs, many=True).data
 
             return Response(
                 {
                     "isSuccess": True,
                     "message": "Data retrieved successfully",
-                    "data": blog_data,
+                    "blogs": blog_data,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -191,6 +181,125 @@ class HomeView(APIView):
                 {"error": "An error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class HomeInactiveView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JWTAuthentication,)
+
+    def get(self, request):
+        try:
+            user = request.user
+            if user.role == 'BLOGGER':
+                blogs = Blog.objects.filter(author=user, active=False)
+                if not blogs:
+                    blogs = Blog.objects.filter(author=user)
+            else:
+                blogs = []
+
+            blog_data = BlogSerializer(blogs, many=True).data
+
+            return Response(
+                {
+                    "isSuccess": True,
+                    "message": "Data retrieved successfully",
+                    "blogs": blog_data,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": "An error occurred"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+
+
+
+
+
+
+
+"""
+kullanıcı admin ise tüm aktif ve aktif olmayan bloglar listelenir.
+Admin değilse o kullanıcının tüm aktif ve aktif olmayan blogları listelenir.
+
+"""
+# class HomeView(APIView):
+#     permission_classes = (IsAuthenticated,)
+#     authentication_classes = (JWTAuthentication,)
+
+#     def get(self, request):
+#         try:
+#             if request.user.role == 'ADMIN':
+#                 active_blogs = Blog.objects.filter(active=True)
+#                 inactive_blogs = Blog.objects.filter(active=False)
+#             else:
+#                 active_blogs = Blog.objects.filter(
+#                     author=request.user, active=True)
+#                 inactive_blogs = []
+
+#             active_blog_data = BlogSerializer(active_blogs, many=True).data
+#             inactive_blog_data = BlogSerializer(inactive_blogs, many=True).data
+
+#             return Response(
+#                 {
+#                     "isSuccess": True,
+#                     "message": "Data retrieved successfully",
+#                     "active_blogs": active_blog_data,
+#                     "inactive_blogs": inactive_blog_data,
+#                 },
+#                 status=status.HTTP_200_OK,
+#             )
+
+#         except Exception as e:
+#             return Response(
+#                 {"error": "An error occurred"},
+#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             )
+
+
+
+"""
+kullanıcı rolü blogger ise kendi bloglarını, kullanıcı rolü admin ise tüm (active,non-active)
+ blogları getirir 
+
+"""
+# class HomeView(APIView):
+#     permission_classes = (IsAuthenticated,)
+#     authentication_classes = (JWTAuthentication,)
+
+#     def get(self, request):
+#         try:
+#             if request.user.role == 'BLOGGER':
+#                 blogs = Blog.objects.filter(
+#                     author=request.user).order_by('-update_date')
+#                 blog_data = BlogSerializer(blogs, many=True).data
+#             elif request.user.role == 'ADMIN':
+#                 blogs = Blog.objects.all().order_by('-update_date')
+#                 blog_data = BlogSerializer(blogs, many=True).data
+#             else:
+#                 return Response(
+#                     {"error": "Invalid user role"},
+#                     status=status.HTTP_400_BAD_REQUEST,
+#                 )
+
+#             return Response(
+#                 {
+#                     "isSuccess": True,
+#                     "message": "Data retrieved successfully",
+#                     "data": blog_data,
+#                 },
+#                 status=status.HTTP_200_OK,
+#             )
+
+#         except Exception as e:
+#             return Response(
+#                 {"error": "An error occurred"},
+#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             )
 
 
 
